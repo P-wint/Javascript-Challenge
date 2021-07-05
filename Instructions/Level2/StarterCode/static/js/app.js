@@ -1,7 +1,7 @@
 // from data.js
 var tableData = data;
 
-// Display UFO sightings
+// table references
 function tableDisplay(ufoSightings) {
     var tbody = d3.select("tbody");
     ufoSightings.forEach((ufoRecord) => {
@@ -13,7 +13,7 @@ function tableDisplay(ufoSightings) {
     });
 };
 
-// prepare the table for new data
+// clear out any existing data
 function deleteTbody() {
     d3.select("tbody")
         .selectAll("tr").remove()
@@ -32,18 +32,26 @@ button.on("click", function(event) {
     d3.event.preventDefault();
     deleteTbody();
 
-    var dateInput = d3.select("#datetime").property("value");
+    var filteredData = tableData;
+    var inputId = document.getElementsByClassName("form-control");
 
-    if (dateInput.trim() === "") {
-        // display the database if the date field has no date
-        var filteredData = tableData;
-    } else {
-        // Display the filtered dataset  
-        var filteredData = tableData.filter(ufoSighting =>
-            ufoSighting.datetime === dateInput.trim());
+    // iterate through all the input fields
+    for (var i = 0; i < inputId.length; i++) {
+
+        var idName = inputId[i].id;
+        var field = d3.select("#" + idName).property("value");
+
+        // treat empty or space-only fields as a search for ALL for that field
+        if (field.trim() !== "") {
+            var filteredData = filteredData.filter(ufoSighting =>
+
+                // match as case insensitive
+                ufoSighting[idName].toUpperCase().trim() ===
+                field.toUpperCase().trim());
+        };
     };
 
-    // message if no record is found
+    // display message if no records found
     if (filteredData.length == 0) {
         d3.select("tbody")
             .append("tr")
@@ -52,6 +60,7 @@ button.on("click", function(event) {
             .html("<h4>No Records Found</h4>");
     };
 
+    // display the database
     console.log(filteredData);
     tableDisplay(filteredData);
 });
